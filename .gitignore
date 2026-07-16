@@ -6,6 +6,7 @@ server.js
 .env
 .env.local
 .env.*.local
+file.env
 
 # IDE
 .vscode/settings.json
