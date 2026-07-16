@@ -1,0 +1,19 @@
+node_modules
+dist
+server.js
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/settings.json
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
