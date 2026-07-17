@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { 
-  Home,
   LayoutDashboard, 
   Search, 
   Sparkles, 
@@ -97,12 +96,6 @@ export default function Sidebar({
     {
       title: "MAIN",
       items: [
-        { 
-          id: "landing", 
-          label: "Home Page", 
-          icon: Home,
-          tooltip: "View the official accommodation portal landing platform."
-        },
         { 
           id: "dashboard", 
           label: "Dashboard", 

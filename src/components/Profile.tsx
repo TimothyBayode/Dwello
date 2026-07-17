@@ -16,14 +16,14 @@ interface ProfileProps {
 }
 
 export default function Profile({ currentUser, onUpdateProfile }: ProfileProps) {
-  const [fullName, setFullName] = useState("Timothy Bayode");
-  const [phone, setPhone] = useState("+234 813 555 7890");
-  const [email, setEmail] = useState("timothy.bayode@futa.edu.ng");
-  const [university, setUniversity] = useState("LAUTECH");
-  const [emergencyName, setEmergencyName] = useState("Adegoke Bayode");
-  const [emergencyPhone, setEmergencyPhone] = useState("+234 803 999 4321");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [university, setUniversity] = useState("");
+  const [emergencyName, setEmergencyName] = useState("");
+  const [emergencyPhone, setEmergencyPhone] = useState("");
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -32,8 +32,8 @@ export default function Profile({ currentUser, onUpdateProfile }: ProfileProps) 
     if (currentUser) {
       setFullName(currentUser.displayName || "");
       setEmail(currentUser.email || "");
-      setUniversity(currentUser.university || "LAUTECH");
-      setAvatarUrl(currentUser.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80");
+      setUniversity(currentUser.university || "");
+      setAvatarUrl(currentUser.avatarUrl || "");
       
       // Fetch other firestore specific details if configured
       if (isFirebaseConfigured()) {
@@ -129,11 +129,17 @@ export default function Profile({ currentUser, onUpdateProfile }: ProfileProps) 
         {/* Left Column: Avatar & Verification status (1 col) */}
         <div className="bg-white border border-slate-100 rounded-xl p-4 md:p-6 shadow-xs text-center space-y-4">
           <div className="relative w-24 h-24 mx-auto group">
-            <img 
-              src={avatarUrl} 
-              alt={fullName} 
-              className="w-24 h-24 rounded-full object-cover border-4 border-purple-100 group-hover:opacity-80 transition-opacity" 
-            />
+            {avatarUrl ? (
+              <img 
+                src={avatarUrl} 
+                alt={fullName} 
+                className="w-24 h-24 rounded-full object-cover border-4 border-purple-100 group-hover:opacity-80 transition-opacity" 
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-purple-100 border-4 border-purple-100 flex items-center justify-center text-purple-600 font-bold text-2xl">
+                {fullName?.charAt(0)?.toUpperCase() || "?"}
+              </div>
+            )}
             {isUploading ? (
               <div className="absolute inset-0 bg-slate-900/50 rounded-full flex items-center justify-center text-white">
                 <Loader2 size={18} className="animate-spin" />

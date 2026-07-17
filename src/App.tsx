@@ -260,6 +260,7 @@ export default function App() {
             onNavigateToTab={handleNavigateToTab} 
             onToggleSaveHostel={handleToggleSave}
             savedHostelIds={savedHostelIds}
+            currentUser={currentUser}
           />
         );
       case "browse":
@@ -343,6 +344,7 @@ export default function App() {
             onNavigateToTab={(tabId) => setActiveTab(tabId)} 
             onToggleSaveHostel={handleToggleSave}
             savedHostelIds={savedHostelIds}
+            currentUser={currentUser}
           />
         );
     }

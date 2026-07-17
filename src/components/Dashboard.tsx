@@ -22,6 +22,13 @@ interface DashboardProps {
   onNavigateToTab: (tabId: string, searchPhrase?: string) => void;
   onToggleSaveHostel: (id: string) => void;
   savedHostelIds: string[];
+  currentUser?: {
+    uid: string;
+    email: string | null;
+    displayName: string;
+    university: string;
+    avatarUrl?: string;
+  } | null;
 }
 
 export default function Dashboard({ 
@@ -29,7 +36,8 @@ export default function Dashboard({
   alerts, 
   onNavigateToTab, 
   onToggleSaveHostel, 
-  savedHostelIds 
+  savedHostelIds,
+  currentUser
 }: DashboardProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [aiResponse, setAiResponse] = useState<{ text: string; matches: Hostel[] } | null>(null);
@@ -103,7 +111,7 @@ export default function Dashboard({
       {/* Header section with User Greeting */}
       <div className="flex flex-col justify-between items-start gap-6 pb-2">
         <div className="space-y-1 md:space-y-2">
-          <h1 className="text-xl md:text-3xl font-bold tracking-tight text-slate-950 leading-tight">Welcome back, Timothy</h1>
+          <h1 className="text-xl md:text-3xl font-bold tracking-tight text-slate-950 leading-tight">Welcome back, {currentUser?.displayName || "Student"}</h1>
           <p className="text-xs md:text-base text-slate-500 leading-relaxed max-w-2xl">
             Your AI-powered housing and campus safety control center is fully operational.
           </p>
@@ -406,7 +414,7 @@ export default function Dashboard({
           {/* Activity Timeline */}
           <div className="bg-white border border-slate-100 rounded-2xl p-4 md:p-8 shadow-xs">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider pb-5 border-b border-slate-100">
-              Timothy's Activity Timeline
+              {currentUser?.displayName || "Student"}'s Activity Timeline
             </h3>
 
             <div className="mt-6 relative border-l border-slate-100 pl-6 space-y-6">
