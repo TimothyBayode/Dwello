@@ -250,6 +250,17 @@ export default function Sidebar({
           tooltip: "Configure active campus zone and notification setups."
         },
       ]
+    },
+    {
+      title: "ADMIN",
+      items: [
+        { 
+          id: "admin", 
+          label: "Admin Console", 
+          icon: ShieldCheck,
+          tooltip: "Super admin panel for full system oversight and management."
+        },
+      ]
     }
   ];
 

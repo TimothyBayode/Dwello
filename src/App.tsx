@@ -21,6 +21,8 @@ import Notifications from "./components/Notifications";
 import Profile from "./components/Profile";
 import Settings from "./components/Settings";
 import AuthPage from "./components/AuthPage";
+import AdminConsole from "./components/AdminConsole";
+import AdminAuth from "./components/AdminAuth";
 
 // Import Firebase handlers
 import { getFirebaseAuth, getFirebaseDb, logoutUser } from "./lib/firebase";
@@ -36,7 +38,7 @@ import {
   initialDiscussions, 
   initialLostFound 
 } from "./data/mockData";
-import { Hostel, IncidentReport, DiscussionThread, LostFoundItem, BookingApplication, NotificationItem } from "./types";
+import { Hostel, SafetyAlert, IncidentReport, DiscussionThread, LostFoundItem, BookingApplication, NotificationItem } from "./types";
 import { Menu, Bell, User, MapPin } from "lucide-react";
 
 export default function App() {
@@ -51,6 +53,12 @@ export default function App() {
     displayName: string;
     university: string;
     avatarUrl?: string;
+  } | null>(null);
+
+  const [adminAuthedUser, setAdminAuthedUser] = useState<{
+    uid: string;
+    email: string | null;
+    displayName: string;
   } | null>(null);
 
   // Sync auth state
@@ -96,9 +104,26 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  // Detect /admin URL path
+  useEffect(() => {
+    if (window.location.pathname === "/admin") {
+      setActiveTab("admin");
+    }
+  }, []);
+
   const handleLogout = async () => {
     await logoutUser();
     setCurrentUser(null);
+    setActiveTab("landing");
+  };
+
+  const handleAdminLoginSuccess = (adminUser: { uid: string; email: string | null; displayName: string }) => {
+    setAdminAuthedUser(adminUser);
+    setActiveTab("admin");
+  };
+
+  const handleAdminLogout = () => {
+    setAdminAuthedUser(null);
     setActiveTab("landing");
   };
 
@@ -123,6 +148,7 @@ export default function App() {
 
   // Centralized state repositories
   const [savedHostelIds, setSavedHostelIds] = useState<string[]>(["h1", "h4"]);
+  const [alerts, setAlerts] = useState<SafetyAlert[]>(safetyAlertsData);
   const [incidents, setIncidents] = useState<IncidentReport[]>(initialIncidents);
   const [discussions, setDiscussions] = useState<DiscussionThread[]>(initialDiscussions);
   const [lostFoundItems, setLostFoundItems] = useState<LostFoundItem[]>(initialLostFound);
@@ -256,11 +282,54 @@ export default function App() {
         return (
           <Dashboard 
             hostels={hostelsData} 
-            alerts={safetyAlertsData} 
+            alerts={alerts} 
             onNavigateToTab={handleNavigateToTab} 
             onToggleSaveHostel={handleToggleSave}
             savedHostelIds={savedHostelIds}
             currentUser={currentUser}
+          />
+        );
+      case "admin":
+        if (!adminAuthedUser) {
+          return <AdminAuth onLoginSuccess={handleAdminLoginSuccess} onBack={() => setActiveTab("landing")} />;
+        }
+        return (
+          <AdminConsole
+            hostels={hostelsData}
+            alerts={alerts}
+            incidents={incidents}
+            discussions={discussions}
+            lostFoundItems={lostFoundItems}
+            applications={applications}
+            notifications={notifications}
+            currentUser={currentUser}
+            adminUser={adminAuthedUser}
+            onNavigateToTab={handleNavigateToTab}
+            onAdminLogout={handleAdminLogout}
+            onAddAlert={(newAlert) => {
+              const id = `a-${Date.now()}`;
+              setAlerts(prev => [{ id, ...newAlert }, ...prev]);
+              setNotifications(prev => [{
+                id: `n-${Date.now()}`,
+                title: "🚨 New Safety Alert Issued",
+                details: newAlert.title,
+                timestamp: "Just Now",
+                type: "alert",
+                isRead: false
+              }, ...prev]);
+            }}
+            onDismissAlert={(id) => setAlerts(prev => prev.filter(a => a.id !== id))}
+            onUpdateIncidentStatus={(id, status) => {
+              setIncidents(prev => prev.map(i => i.id === id ? { ...i, status } : i));
+            }}
+            onDeleteDiscussion={(id) => setDiscussions(prev => prev.filter(d => d.id !== id))}
+            onDeleteLostFound={(id) => setLostFoundItems(prev => prev.filter(i => i.id !== id))}
+            onUpdateHostel={(id, updates) => {
+              hostelsData.forEach(h => { if (h.id === id) Object.assign(h, updates); });
+            }}
+            onUpdateApplicationStatus={(id, status, stepIndex) => {
+              setApplications(prev => prev.map(a => a.id === id ? { ...a, status, stepIndex } : a));
+            }}
           />
         );
       case "browse":
@@ -303,7 +372,7 @@ export default function App() {
           />
         );
       case "live-alerts":
-        return <LiveAlerts alerts={safetyAlertsData} />;
+        return <LiveAlerts alerts={alerts} />;
       case "incidents":
         return <IncidentReports incidents={incidents} onSubmitIncident={handleAddIncident} />;
       case "sos":
@@ -340,7 +409,7 @@ export default function App() {
         return (
           <Dashboard 
             hostels={hostelsData} 
-            alerts={safetyAlertsData} 
+            alerts={alerts} 
             onNavigateToTab={(tabId) => setActiveTab(tabId)} 
             onToggleSaveHostel={handleToggleSave}
             savedHostelIds={savedHostelIds}
@@ -354,7 +423,7 @@ export default function App() {
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
       
       {/* Sidebar navigation panel */}
-      {activeTab !== "landing" && activeTab !== "auth" && (
+      {activeTab !== "landing" && activeTab !== "auth" && activeTab !== "admin" && (
         <Sidebar 
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
@@ -372,7 +441,7 @@ export default function App() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         
         {/* Universal Top Header */}
-        {activeTab !== "landing" && activeTab !== "auth" && (
+        {activeTab !== "landing" && activeTab !== "auth" && activeTab !== "admin" && (
           <header className="h-16 border-b border-slate-100 bg-white flex items-center justify-between px-4 md:px-6 z-10">
             <div className="flex items-center gap-2 md:gap-3 min-w-0">
               <button 
@@ -416,7 +485,7 @@ export default function App() {
         )}
 
         {/* Dynamic component routing panels */}
-        <main className={`flex-1 overflow-y-auto ${(activeTab === "landing" || activeTab === "auth") ? "p-0" : "p-4 md:p-8 space-y-4 md:space-y-6"}`}>
+        <main className={`flex-1 overflow-y-auto ${(activeTab === "landing" || activeTab === "auth" || activeTab === "admin") ? "p-0" : "p-4 md:p-8 space-y-4 md:space-y-6"}`}>
           {renderActivePage()}
         </main>
 

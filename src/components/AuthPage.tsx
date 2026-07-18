@@ -284,7 +284,7 @@ export default function AuthPage({ initialMode, onNavigateToTab, onLoginSuccess 
                       <input
                         type="email"
                         required
-                        placeholder="e.g. t.bayode@student.futa.edu.ng"
+                        placeholder="e.g. t.bayode@student.lautech.edu.ng"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200/80 text-xs text-slate-950 rounded-xl py-3 pl-10 pr-4 focus:outline-hidden focus:border-purple-600 focus:bg-white placeholder-slate-400 font-medium transition-all"
